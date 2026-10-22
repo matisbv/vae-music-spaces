@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=64"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,6 +8,8 @@ description = "Train a PianoTree-VAE from scratch on the DCML corpora"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [{ name = "Matis Brassard-Verrier" }]
+license = "MIT"
+license-files = ["LICENSE", "licenses/*"]
 dynamic = ["version"]
 dependencies = [
     "numpy>=1.24",

@@ -28,3 +28,9 @@ uv run pianotree-dcml train configs/tiny.toml --run-dir runs/tiny
 
 See [the training instructions](docs/train.md) for the full-size model, what a run
 produces, and how training works.
+
+## License
+The code is released under the [MIT License](LICENSE). The model is adapted from the
+[original PianoTree-VAE implementation](https://github.com/ZZWaang/PianoTree-VAE) by Ziyu Wang et al.,
+also under the MIT License (see [licenses/PianoTree-VAE.txt](licenses/PianoTree-VAE.txt)).
+The DCML corpora are not included and are distributed by the DCML lab under their own terms.
