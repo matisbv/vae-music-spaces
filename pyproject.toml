@@ -17,6 +17,9 @@ dependencies = [
     "tqdm>=4.65",
 ]
 
+[project.scripts]
+pianotree-dcml = "pianotree_dcml.cli:main"
+
 [project.optional-dependencies]
 # PyTorch comes in a CPU-only and a CUDA build: pick one with
 # `uv sync --extra cpu` or `uv sync --extra cuda`.

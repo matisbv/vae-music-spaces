@@ -10,9 +10,14 @@ Matis Brassard-Verrier
 Before you start working with the project, you have to setup the environment for the code. You can do this by following the instructions [here](docs/environment.md).
 
 ## Prepare the datasets
-- First, within folder `data/`, clone the [dcml_corpora](https://github.com/DCMLab/dcml_corpora) corpus from the [DCMLab](https://www.epfl.ch/labs/dcml/).
-	- You should now have a subfolder `data/dcml_corpora` containing the corpus.
-- To prepare the datasets for training and inference, follow the instructions [here](docs/preparing_data.md).
+Download the [DCML corpora](https://github.com/DCMLab/dcml_corpora) and turn them into training data:
+
+```
+uv run pianotree-dcml download
+uv run pianotree-dcml prepare
+```
+
+See [the data instructions](docs/preparing_data.md) for what these commands produce and how bars are built.
 
 ## Train the model and use it for inference
 - To train the model, follow the instructions [here](docs/train.md).
