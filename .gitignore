@@ -1,0 +1,7 @@
+data/*
+.vscode
+__pycache__/
+log*
+models*
+model_config_*
+output*
