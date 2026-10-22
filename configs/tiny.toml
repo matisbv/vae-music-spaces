@@ -1,0 +1,25 @@
+# A small PianoTree-VAE trained on Chopin's mazurkas only.
+# Trains on a laptop CPU in well under an hour: use it to follow the tutorial end to end.
+# Options left out take the defaults documented in src/pianotree_dcml/config.py.
+
+[data]
+corpora = ["chopin_mazurkas"]
+seq_len = 12          # 3/4 bars: 12 sixteenth notes
+transpose = [-5, 6]   # random transposition of training bars, in semitones
+
+[model]
+note_emb_size = 64
+enc_notes_hid_size = 128
+enc_time_hid_size = 256
+z_size = 128
+dec_emb_hid_size = 64
+dec_time_hid_size = 256
+dec_notes_hid_size = 256
+dec_z_in_size = 128
+dec_dur_hid_size = 32
+
+[train]
+epochs = 10
+batch_size = 128
+lr_decay = 0.999      # few batches per epoch: decay faster than for the full model
+beta = 0.1

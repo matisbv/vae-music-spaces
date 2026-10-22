@@ -6,14 +6,12 @@ build-backend = "setuptools.build_meta"
 name = "pianotree-dcml"
 description = "Train a PianoTree-VAE from scratch on the DCML corpora"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [{ name = "Matis Brassard-Verrier" }]
 dynamic = ["version"]
 dependencies = [
     "numpy>=1.24",
     "pandas>=2.0",
-    "scikit-learn>=1.3",
-    "tensorboardX>=2.6",
     "tqdm>=4.65",
 ]
 
@@ -54,3 +52,4 @@ version = { attr = "pianotree_dcml.__version__" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["slow: trains a small model for about a minute (skip with -m 'not slow')"]

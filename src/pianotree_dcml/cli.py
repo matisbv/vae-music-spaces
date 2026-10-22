@@ -31,11 +31,23 @@ def main(argv: list[str] | None = None) -> None:
                       help="share of each corpus's bars used for validation (default: 0.1)")
     prep.add_argument("--seed", type=int, default=0, help="seed of the train/valid split")
 
+    train_cmd = commands.add_parser("train", help="train a model")
+    train_cmd.add_argument("config", type=Path, help="TOML configuration (see configs/)")
+    train_cmd.add_argument("--run-dir", type=Path, required=True,
+                           help="directory for checkpoints and metrics, e.g. runs/tiny")
+    train_cmd.add_argument("--resume", action="store_true", help="continue the run in --run-dir")
+
     args = parser.parse_args(argv)
     if args.command == "download":
         download_dcml(args.dest, args.force)
     elif args.command == "prepare":
         prepare(args.zip, args.out_dir, args.valid_fraction, args.seed)
+    elif args.command == "train":
+        # Imported here so that the data commands work without loading PyTorch.
+        from pianotree_dcml.config import Config
+        from pianotree_dcml.train import train
+
+        train(Config.from_toml(args.config), args.run_dir, args.resume)
 
 
 if __name__ == "__main__":

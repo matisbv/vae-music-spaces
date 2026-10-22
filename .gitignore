@@ -13,3 +13,6 @@ __pycache__/
 
 # Editors
 .vscode/
+
+# Training runs
+/runs/

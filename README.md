@@ -19,6 +19,12 @@ uv run pianotree-dcml prepare
 
 See [the data instructions](docs/preparing_data.md) for what these commands produce and how bars are built.
 
-## Train the model and use it for inference
-- To train the model, follow the instructions [here](docs/train.md).
-- To perform inference with a trained model, follow the instructions [here](docs/inference.md).
+## Train the model
+Train a small model on your own machine:
+
+```
+uv run pianotree-dcml train configs/tiny.toml --run-dir runs/tiny
+```
+
+See [the training instructions](docs/train.md) for the full-size model, what a run
+produces, and how training works.

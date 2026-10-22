@@ -1,0 +1,15 @@
+# PianoTree-VAE at the size of the original paper, trained on all 12 DCML corpora.
+# Needs a GPU (e.g. a free Kaggle or Colab T4); on a CPU, one epoch takes hours.
+# Options left out take the defaults documented in src/pianotree_dcml/config.py.
+
+[data]
+seq_len = 16          # bars of up to 16 sixteenth notes (4/4, 3/4, 2/4, 6/8, ...): 97% of bars
+transpose = [-5, 6]   # random transposition of training bars, in semitones
+
+[model]
+# The defaults are the layer sizes of the original PianoTree-VAE (13.6M parameters).
+
+[train]
+epochs = 30
+batch_size = 128
+beta = 0.1
