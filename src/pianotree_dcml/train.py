@@ -76,7 +76,8 @@ def train(config: Config, run_dir: Path | str, resume: bool = False) -> None:
         row |= {f"valid_{k}": v for k, v in valid_metrics.items()}
         _append_csv(run_dir / "metrics.csv", row)
         print(f"Epoch {epoch + 1}/{config.train.epochs}: train loss {train_metrics['loss']:.2f}, "
-              f"valid loss {valid_metrics['loss']:.2f}, valid note F1 {valid_metrics['note_f1']:.3f}")
+              f"valid loss {valid_metrics['loss']:.2f}, valid note F1 {valid_metrics['note_f1']:.3f}",
+              flush=True)  # show progress live in notebooks and logs, not only in terminals
 
         checkpoint = {
             "config": config.to_dict(),

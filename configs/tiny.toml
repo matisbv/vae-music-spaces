@@ -19,7 +19,11 @@ dec_z_in_size = 128
 dec_dur_hid_size = 32
 
 [train]
-epochs = 10
-batch_size = 128
+# With few bars, smaller batches and a higher learning rate give more optimizer steps in
+# the same time: on a 2-thread laptop CPU, about 27 minutes for a validation note F1 of
+# about 0.32 (twice that of batches of 128 at a learning rate of 1e-3).
+epochs = 20
+batch_size = 64
+learning_rate = 2e-3
 lr_decay = 0.999      # few batches per epoch: decay faster than for the full model
-beta = 0.1
+beta = 0.1            # an untuned default; see docs/train.md

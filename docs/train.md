@@ -14,10 +14,12 @@ uv run pianotree-dcml train configs/tiny.toml --run-dir runs/tiny
 | Data | Chopin's mazurkas (about 4,300 training bars of 3/4) | all 12 corpora, bars of up to 16 sixteenths (about 53,000 training bars) |
 | Model | 2.1M parameters | 13.6M parameters (sizes of the original paper) |
 | Hardware | any laptop CPU | a GPU |
-| Time | about 75 s per epoch, 10 epochs, on a 2-thread laptop CPU | hours per epoch on a CPU |
+| Time | about 27 minutes (20 epochs) on a 2-thread laptop CPU | hours per epoch on a CPU |
 
-`tiny` lets you follow the whole tutorial on your own machine. `full` is the model to
-use for real results. If you don't have a GPU, see [Training on Kaggle or Colab](#training-on-kaggle-or-colab).
+`tiny` lets you follow the whole tutorial on your own machine. After 20 epochs, it
+reconstructs about a third of the validation notes exactly (note F1 of about 0.32): enough
+to see the model at work, not to get good reconstructions. `full` is the model to use for
+real results. If you don't have a GPU, see [Training on Kaggle or Colab](#training-on-kaggle-or-colab).
 
 To try other settings, copy a configuration and edit it. Every option, with its default, is
 documented in [`src/pianotree_dcml/config.py`](../src/pianotree_dcml/config.py).
@@ -55,6 +57,12 @@ model, config = load_checkpoint("runs/tiny/best.pt")
 A larger `beta` gives a smoother, more regular latent space, at the cost of less precise
 reconstructions. `beta_warmup_epochs` and `free_nats` are two common ways to keep the
 decoder from ignoring the latent code early in training.
+
+The default `beta = 0.1` has not been tuned. In the `tiny` runs, it neither made the
+decoder ignore the latent code (all latent dimensions stay in use) nor held back
+reconstruction (the KL term is a small part of the loss). Whether another value gives
+better reconstructions or a more useful latent space for the full model is still open: a
+small sweep, e.g. 0.01, 0.1 and 0.5, is worth running if you have the GPU time.
 
 **Teacher forcing.** The decoder generates a bar one note at a time, from its own previous
 predictions. Early in training, those predictions are poor, so the decoder is sometimes fed
