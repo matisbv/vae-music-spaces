@@ -1,8 +1,12 @@
 # Instructions for environment setup
 [<< go back to the main README](../README.md)
-1. Create a virtual environment with Python 3.10.11. One can do so using e.g. [Anaconda](https://www.anaconda.com/) with the command `conda create -n vae-music-spaces python=3.10`.
-2. Install the necessary Python packages.
-	- Navigate in the project folder and activate the virtual environment with (if using Anaconda) `conda activate vae-music-spaces`.
-	- Run the command `pip install -r requirements.txt`.
+
+You need Python 3.10 or newer. From the project folder:
+
+1. Create and activate a virtual environment:
+	- `python -m venv .venv`
+	- `source .venv/bin/activate` (Linux/macOS) or `.venv\Scripts\activate` (Windows)
+2. Install the package with its development tools: `pip install -e ".[dev]"`
+3. Check the installation by running the tests: `pytest`
 
 The environment is now ready!

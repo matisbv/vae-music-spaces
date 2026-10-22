@@ -1,7 +1,15 @@
-data/*
-.vscode
+# Data, experiment configs and training outputs
+/data/
+/model_config_*.json
+/models_*/
+/log_*/
+/output*/
+
+# Python
 __pycache__/
-log*
-models*
-model_config_*
-output*
+*.egg-info/
+.venv/
+.pytest_cache/
+
+# Editors
+.vscode/
