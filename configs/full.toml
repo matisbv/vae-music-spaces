@@ -10,6 +10,6 @@ transpose = [-5, 6]   # random transposition of training bars, in semitones
 # The defaults are the layer sizes of the original PianoTree-VAE (13.6M parameters).
 
 [train]
-epochs = 30
+epochs = 60           # about 5 minutes per epoch on a Kaggle T4 GPU: about 5 hours in total
 batch_size = 128
 beta = 0.1
