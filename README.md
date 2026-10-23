@@ -65,7 +65,7 @@ tests/                   run them with `uv run pytest`
 
 ## Background
 
-This project started as my master's thesis (2023), which studied how the latent space of
+This project started as my [master's thesis](https://zenodo.org/records/19537861) (2023), which studied how the latent space of
 such a model reflects changes in musical style over time. The original thesis code is
 archived at [vae-music-spaces-thesis-2023](https://github.com/matisbv/vae-music-spaces-thesis-2023).
 This repository is a rewrite focused on training the model, with several bugs of the
