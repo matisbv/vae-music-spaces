@@ -37,6 +37,18 @@ def main(argv: list[str] | None = None) -> None:
                            help="directory for checkpoints and metrics, e.g. runs/tiny")
     train_cmd.add_argument("--resume", action="store_true", help="continue the run in --run-dir")
 
+    encode = commands.add_parser(
+        "encode", help="save the latent code of every bar (needs the analysis extra)")
+    encode.add_argument("checkpoint", type=Path, help="a trained model, e.g. runs/full/best.pt")
+    encode.add_argument("--out", type=Path, default=None,
+                        help="output .npz file (default: embeddings*.npz next to the checkpoint)")
+    encode.add_argument("--to-c", action="store_true",
+                        help="transpose every piece to C major / C minor before encoding")
+    encode.add_argument("--untrained", action="store_true",
+                        help="use randomly initialised weights instead (the control model)")
+    encode.add_argument("--seed", type=int, default=0, help="seed of the untrained weights")
+    encode.add_argument("--device", default="cpu", help="cpu or cuda")
+
     args = parser.parse_args(argv)
     if args.command == "download":
         download_dcml(args.dest, args.force)
@@ -48,6 +60,15 @@ def main(argv: list[str] | None = None) -> None:
         from pianotree_dcml.train import train
 
         train(Config.from_toml(args.config), args.run_dir, args.resume)
+    elif args.command == "encode":
+        from pianotree_dcml.analysis.encode import default_output_path, encode_bars, save_embeddings
+
+        embeddings = encode_bars(args.checkpoint, transpose_to_c=args.to_c,
+                                 untrained=args.untrained, seed=args.seed, device=args.device)
+        out = args.out or default_output_path(args.checkpoint, args.to_c, args.untrained)
+        save_embeddings(embeddings, out)
+        print(f"Saved the codes of {len(embeddings)} bars to {out} "
+              f"(left out: {embeddings.info['excluded']})")
 
 
 if __name__ == "__main__":

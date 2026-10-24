@@ -25,6 +25,13 @@ pianotree-dcml = "pianotree_dcml.cli:main"
 # `uv sync --extra cpu` or `uv sync --extra cuda`.
 cpu = ["torch>=2.1"]
 cuda = ["torch>=2.1; sys_platform != 'darwin'"]
+# Analysing a trained model: probes, figures, audio and notebooks.
+analysis = [
+    "ipykernel>=6.29",
+    "matplotlib>=3.8",
+    "pretty_midi>=0.2.10",
+    "scikit-learn>=1.4",
+]
 
 [dependency-groups]
 dev = ["pytest>=8"]

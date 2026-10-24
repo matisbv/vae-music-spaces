@@ -10,7 +10,8 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-from pianotree_dcml.representation import N_PITCHES, dur_width_for, duration_matrix_to_grid
+from pianotree_dcml.data.keys import shift_to_c
+from pianotree_dcml.representation import N_PITCHES, Note, dur_width_for, duration_matrix_to_grid
 
 
 class BarDataset(Dataset):
@@ -29,6 +30,11 @@ class BarDataset(Dataset):
     ``transpose=(low, high)`` transposes each bar by a random number of semitones in
     ``[low, high]`` every time it is loaded (data augmentation). The range is narrowed
     for each bar so that no note leaves the MIDI range.
+
+    ``transpose_to_c=True`` transposes every bar so that the key of its piece becomes C
+    major or C minor (see :func:`pianotree_dcml.data.keys.shift_to_c`), which removes
+    the key from what the model sees. Bars of pieces without an annotated key are left
+    out.
     """
 
     def __init__(
@@ -40,7 +46,10 @@ class BarDataset(Dataset):
         corpora: Sequence[str] | None = None,
         timesigs: Sequence[str] | None = None,
         transpose: tuple[int, int] = (0, 0),
+        transpose_to_c: bool = False,
     ):
+        if transpose_to_c and transpose != (0, 0):
+            raise ValueError("transpose_to_c and random transposition can't be combined")
         data_dir = Path(data_dir)
         bars = pd.read_csv(data_dir / "bars.csv")
         notes = pd.read_csv(data_dir / "notes.csv")
@@ -62,8 +71,14 @@ class BarDataset(Dataset):
         too_dense = bars.bar_id.isin(max_onsets.index[max_onsets > max_simu_note - 2])
         excluded["too many simultaneous notes"] = (keep & too_dense).sum()
         keep &= ~too_dense
+        if transpose_to_c:
+            no_key = bars.key.isna()
+            excluded["no annotated key"] = (keep & no_key).sum()
+            keep &= ~no_key
 
         self.bars = bars[keep].reset_index(drop=True)
+        if transpose_to_c:
+            self.bars["shift_to_c"] = self.bars.key.map(shift_to_c)
         self.n_excluded = {reason: int(n) for reason, n in excluded.items()}
         self.seq_len = seq_len
         self.max_simu_note = max_simu_note
@@ -81,6 +96,10 @@ class BarDataset(Dataset):
         self._duration = notes.duration.to_numpy()[order]
         self._start = np.searchsorted(rows, np.arange(len(self.bars)), side="left")
         self._end = np.searchsorted(rows, np.arange(len(self.bars)), side="right")
+        if transpose_to_c:
+            self._pitch = self._pitch + self.bars.shift_to_c.to_numpy()[rows]
+            if len(self._pitch) and not 0 <= self._pitch.min() <= self._pitch.max() < N_PITCHES:
+                raise ValueError("transposing to C pushes notes out of the MIDI range")
 
     def __len__(self) -> int:
         return len(self.bars)
@@ -92,6 +111,21 @@ class BarDataset(Dataset):
         matrix[self._onset[notes], pitch] = self._duration[notes]
         grid = duration_matrix_to_grid(matrix, self.max_simu_note, self.dur_width)
         return torch.from_numpy(grid), index
+
+    def notes(self, index: int) -> list[Note]:
+        """The notes of a bar, as the model sees them (after any ``transpose_to_c``, but
+        without random transposition)."""
+        notes = slice(self._start[index], self._end[index])
+        return sorted(Note(int(t), int(p), int(d)) for t, p, d in
+                      zip(self._onset[notes], self._pitch[notes], self._duration[notes]))
+
+    def notes_table(self) -> pd.DataFrame:
+        """All notes as the model sees them (see :meth:`notes`); ``bar`` is the row of
+        their bar in ``self.bars``."""
+        return pd.DataFrame({
+            "bar": np.repeat(np.arange(len(self.bars)), self._end - self._start),
+            "onset": self._onset, "pitch": self._pitch, "duration": self._duration,
+        })
 
     def _random_shift(self, pitches: np.ndarray) -> int:
         low = max(self.transpose[0], -int(pitches.min()))

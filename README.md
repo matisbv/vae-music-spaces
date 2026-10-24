@@ -42,6 +42,8 @@ model, trained on all corpora, needs a GPU: free ones are available on Kaggle an
    built from the scores
 3. [Training](docs/train.md): the two configurations, what a run produces, and how the model
    is trained
+4. [Analysis tools](docs/analysis.md): encode the corpus into the latent space, describe and
+   decode bars, and listen to the results
 
 The code is documented throughout. A good place to start reading is
 [`representation.py`](src/pianotree_dcml/representation.py), which describes the data
@@ -59,6 +61,7 @@ src/pianotree_dcml/
     losses.py            training objective
     metrics.py           note-level precision, recall and F1
     train.py             training loop, checkpoints
+    analysis/            encoding, bar features, decoding, audio and plots
     cli.py               the pianotree-dcml command
 tests/                   run them with `uv run pytest`
 ```
