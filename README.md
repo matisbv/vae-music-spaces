@@ -45,6 +45,20 @@ model, trained on all corpora, needs a GPU: free ones are available on Kaggle an
 4. [Analysis tools](docs/analysis.md): encode the corpus into the latent space, describe and
    decode bars, and listen to the results
 
+## What the model learned
+
+Four notebooks look inside the trained models, comparing them with an untrained copy and with
+simple measurements of the music. Each one comes with figures and sounds.
+
+1. [What does the model remember about a bar?](notebooks/03_what_the_code_remembers.ipynb)
+   Mostly a faithful picture of the notes, not their musical context.
+2. [Moving through the code](notebooks/04_moving_through_the_code.ipynb): some musical
+   qualities, like "higher" and "busier", are directions you can move along; others are not.
+3. [Do related keys sit close together?](notebooks/05_related_keys.ipynb) One of the models
+   rediscovered the circle of fifths on its own.
+4. [Composers and the history of music](notebooks/06_composers_and_history.ipynb): the code
+   recognises composers and dates pieces, better than simple statistics but far from perfectly.
+
 The code is documented throughout. A good place to start reading is
 [`representation.py`](src/pianotree_dcml/representation.py), which describes the data
 formats, then [`model.py`](src/pianotree_dcml/model.py).
@@ -63,6 +77,7 @@ src/pianotree_dcml/
     train.py             training loop, checkpoints
     analysis/            encoding, bar features, decoding, audio and plots
     cli.py               the pianotree-dcml command
+notebooks/               the analysis of the trained models, with exported figures and sounds
 tests/                   run them with `uv run pytest`
 ```
 
@@ -71,8 +86,8 @@ tests/                   run them with `uv run pytest`
 This project started as my [master's thesis](https://zenodo.org/records/19537861) (2023), which studied how the latent space of
 such a model reflects changes in musical style over time. The original thesis code is
 archived at [vae-music-spaces-thesis-2023](https://github.com/matisbv/vae-music-spaces-thesis-2023).
-This repository is a rewrite focused on training the model, with several bugs of the
-original pipeline fixed. Notebooks exploring the latent space will follow.
+This repository is a rewrite, with several bugs of the original pipeline fixed and a more
+rigorous analysis of the latent space.
 
 ## References
 
