@@ -18,7 +18,7 @@ import pandas as pd
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression, RidgeCV
 from sklearn.metrics import balanced_accuracy_score, r2_score
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GroupKFold, cross_val_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -59,16 +59,28 @@ def probe(
 
     if kind == "number":
         model = make_pipeline(StandardScaler(), RidgeCV(alphas=np.logspace(-2, 4, 13)))
-        score, chance = r2_score, 0.0
     else:
         y_train, y_test = np.asarray(y_train).astype(str), np.asarray(y_test).astype(str)
         model = make_pipeline(StandardScaler(), LogisticRegression(C=0.1, max_iter=2000))
-        score, chance = balanced_accuracy_score, 1 / len(np.unique(y_test))
     predictions = model.fit(x_train, y_train).predict(x_test)
+    return score_predictions(y_test, predictions, pieces_test, kind, n_bootstrap, seed)
 
-    # Resample whole pieces: bars of a piece resemble each other, so pieces, not bars,
-    # are the independent units.
-    unique_pieces, piece_index = np.unique(pieces_test, return_inverse=True)
+
+def score_predictions(
+    y: np.ndarray, predictions: np.ndarray, pieces: np.ndarray, kind: str,
+    n_bootstrap: int = 500, seed: int = 0,
+) -> ProbeResult:
+    """Score predictions (R² or balanced accuracy, see ``ProbeResult``), with a 95%
+    interval from resampling whole pieces: bars of a piece resemble each other, so pieces,
+    not bars, are the independent units."""
+    y, predictions = np.asarray(y), np.asarray(predictions)
+    if kind == "number":
+        score, chance = r2_score, 0.0
+    else:
+        y, predictions = y.astype(str), predictions.astype(str)
+        score, chance = balanced_accuracy_score, 1 / len(np.unique(y))
+    rng = np.random.default_rng(seed)
+    unique_pieces, piece_index = np.unique(pieces, return_inverse=True)
     bars_of = [np.flatnonzero(piece_index == p) for p in range(len(unique_pieces))]
     resampled = []
     with warnings.catch_warnings():
@@ -77,11 +89,41 @@ def probe(
         for _ in range(n_bootstrap):
             chosen = rng.integers(len(bars_of), size=len(bars_of))
             rows = np.concatenate([bars_of[p] for p in chosen])
-            if kind == "category" and len(np.unique(y_test[rows])) < 2:
+            if kind == "category" and len(np.unique(y[rows])) < 2:
                 continue
-            resampled.append(score(y_test[rows], predictions[rows]))
+            resampled.append(score(y[rows], predictions[rows]))
+        total = score(y, predictions)
     low, high = np.percentile(resampled, [2.5, 97.5])
-    return ProbeResult(float(score(y_test, predictions)), float(low), float(high), chance)
+    return ProbeResult(float(total), float(low), float(high), chance)
+
+
+def cross_validated_predictions(
+    x: np.ndarray, y: np.ndarray, pieces: np.ndarray, kind: str, n_folds: int = 5,
+    max_train: int = 10000, balanced: bool = False, seed: int = 0,
+) -> np.ndarray:
+    """Predictions of a linear probe for every bar, each made by a probe trained on the
+    other pieces (pieces are split into ``n_folds`` groups). For categories, returns the
+    predicted probability of each class (columns in sorted class order); for numbers, the
+    predicted value. With ``balanced``, every class weighs the same in training, however
+    many bars it has, so that predictions don't drift towards the largest classes."""
+    y = np.asarray(y)
+    classes = np.unique(y.astype(str)) if kind == "category" else None
+    out = np.zeros((len(y), len(classes))) if kind == "category" else np.zeros(len(y))
+    rng = np.random.default_rng(seed)
+    for train, test in GroupKFold(n_splits=n_folds).split(x, y, pieces):
+        if len(train) > max_train:
+            train = rng.choice(train, max_train, replace=False)
+        if kind == "category":
+            model = make_pipeline(StandardScaler(), LogisticRegression(
+                C=0.1, max_iter=2000, class_weight="balanced" if balanced else None))
+            model.fit(x[train], y[train].astype(str))
+            probabilities = np.zeros((len(test), len(classes)))
+            probabilities[:, np.searchsorted(classes, model.classes_)] = model.predict_proba(x[test])
+            out[test] = probabilities
+        else:
+            model = make_pipeline(StandardScaler(), RidgeCV(alphas=np.logspace(-2, 4, 13)))
+            out[test] = model.fit(x[train], y[train]).predict(x[test])
+    return out
 
 
 def run_probes(

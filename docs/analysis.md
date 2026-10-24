@@ -7,6 +7,8 @@ The analysis itself is in the notebooks:
   (figures and sounds in [`notebooks/outputs/q1`](../notebooks/outputs/q1))
 - [Moving through the code](../notebooks/04_moving_through_the_code.ipynb)
   (figures and sounds in [`notebooks/outputs/q2`](../notebooks/outputs/q2))
+- [Do related keys sit close together?](../notebooks/05_related_keys.ipynb)
+  (figures and sounds in [`notebooks/outputs/q3`](../notebooks/outputs/q3))
 
 Once a model is trained, these tools let you look inside it: encode every bar of the corpus
 into the latent space, describe bars with simple measurements, decode latent codes back into

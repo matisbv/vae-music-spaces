@@ -1705,6 +1705,8 @@ analysis = [
     { name = "matplotlib" },
     { name = "pretty-midi" },
     { name = "scikit-learn" },
+    { name = "scipy", version = "1.17.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12' or (extra == 'extra-14-pianotree-dcml-cpu' and extra == 'extra-14-pianotree-dcml-cuda')" },
+    { name = "scipy", version = "1.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12' or (extra == 'extra-14-pianotree-dcml-cpu' and extra == 'extra-14-pianotree-dcml-cuda')" },
 ]
 cpu = [
     { name = "torch", version = "2.14.1", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "(sys_platform == 'darwin' and extra == 'extra-14-pianotree-dcml-cpu') or (extra == 'extra-14-pianotree-dcml-cpu' and extra == 'extra-14-pianotree-dcml-cuda')" },
@@ -1728,6 +1730,7 @@ requires-dist = [
     { name = "pandas", specifier = ">=2.0" },
     { name = "pretty-midi", marker = "extra == 'analysis'", specifier = ">=0.2.10" },
     { name = "scikit-learn", marker = "extra == 'analysis'", specifier = ">=1.4" },
+    { name = "scipy", marker = "extra == 'analysis'", specifier = ">=1.11" },
     { name = "torch", marker = "sys_platform != 'darwin' and extra == 'cuda'", specifier = ">=2.1", index = "https://download.pytorch.org/whl/cu126", conflict = { package = "pianotree-dcml", extra = "cuda" } },
     { name = "torch", marker = "extra == 'cpu'", specifier = ">=2.1", index = "https://download.pytorch.org/whl/cpu", conflict = { package = "pianotree-dcml", extra = "cpu" } },
     { name = "tqdm", specifier = ">=4.65" },
