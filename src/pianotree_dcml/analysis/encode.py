@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Sequence
 
 import numpy as np
 import pandas as pd
@@ -16,6 +17,7 @@ from pianotree_dcml.config import Config
 from pianotree_dcml.data.dataset import BarDataset
 from pianotree_dcml.data.keys import shift_to_c
 from pianotree_dcml.model import PianoTreeVAE
+from pianotree_dcml.representation import Note, notes_to_grid
 from pianotree_dcml.train import build_model, load_checkpoint
 
 
@@ -47,6 +49,26 @@ def encode_dataset(
     means, scales = [], []
     for grids, _ in tqdm(DataLoader(dataset, batch_size=batch_size), desc="Encoding", leave=False):
         posterior = model.encode(grids.to(device))
+        means.append(posterior.mean.cpu())
+        scales.append(posterior.scale.cpu())
+    return torch.cat(means).numpy(), torch.cat(scales).numpy()
+
+
+@torch.no_grad()
+def encode_notes(
+    model: PianoTreeVAE, bars: Sequence[Sequence[Note]], batch_size: int = 256,
+    device: str = "cpu",
+) -> tuple[np.ndarray, np.ndarray]:
+    """Mean and standard deviation of q(z | bar) for bars given as notes, e.g. bars
+    transformed on purpose. Onsets with more notes than a piano-grid holds keep their
+    lowest notes."""
+    model.eval().to(device)
+    grids = torch.from_numpy(np.stack([
+        notes_to_grid(notes, model.seq_len, model.max_simu_note, overflow="truncate")
+        for notes in bars]))
+    means, scales = [], []
+    for start in range(0, len(grids), batch_size):
+        posterior = model.encode(grids[start:start + batch_size].to(device))
         means.append(posterior.mean.cpu())
         scales.append(posterior.scale.cpu())
     return torch.cat(means).numpy(), torch.cat(scales).numpy()
