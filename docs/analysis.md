@@ -52,9 +52,9 @@ dataset.notes(0)                    # the notes of the first bar
 
 [`features.py`](../src/pianotree_dcml/analysis/features.py) measures each bar in ways anyone
 can understand: its register (how high it is), how many notes it has and how many start
-together, how long they are, how much the melody leaps, how often notes played together
-clash, and which of the 12 note names it uses. `FEATURES` lists them all with a plain
-description.
+together, how long they are, how much the melody leaps, how dissonant (tense) the notes
+played together are, and which of the 12 note names it uses. `FEATURES` lists them all with
+a plain description.
 
 ```python
 from pianotree_dcml.analysis.features import bar_features

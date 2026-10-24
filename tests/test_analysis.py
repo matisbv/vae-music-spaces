@@ -124,7 +124,7 @@ def test_bar_features():
     assert first.pc_C == pytest.approx(2 / 5) and first.pc_E == pytest.approx(1 / 5)
     assert first.pitch_class_entropy == pytest.approx(-(0.4 * np.log2(0.4) + 0.6 * np.log2(0.2)))
     assert first.top_line_leap == pytest.approx(3)  # highest notes 66 -> 67 -> 72
-    assert first.clash_fraction == pytest.approx(2 / 3)  # 60-66 tritone, 64-66 whole tone
+    assert first.dissonance == pytest.approx(2 / 3)  # 60-66 tritone, 64-66 whole tone
 
     empty = features.loc[1]
     assert (empty.n_notes, empty.note_density, empty.sounding_fraction) == (0, 0, 0)

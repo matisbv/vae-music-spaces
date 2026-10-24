@@ -21,9 +21,9 @@ from pianotree_dcml.representation import Note, pitch_name
 
 PITCH_CLASSES = [re.sub(r"-?\d+$", "", pitch_name(60 + i)) for i in range(12)]
 
-# Intervals (in semitones, ignoring octaves) that sound tense when played together:
-# the semitone, whole tone, tritone, minor and major seventh.
-CLASHING_INTERVALS = [1, 2, 6, 10, 11]
+# Dissonant intervals (in semitones, ignoring octaves): those that sound tense when played
+# together, i.e. the semitone, whole tone, tritone, minor and major seventh.
+DISSONANT_INTERVALS = [1, 2, 6, 10, 11]
 
 FEATURES = {
     "n_notes": "number of notes",
@@ -45,8 +45,8 @@ FEATURES = {
                            "low for a few repeated notes, high for chromatic music",
     "top_line_leap": "average jump between successive highest notes, in semitones: "
                      "a smooth or a leaping melody",
-    "clash_fraction": "share of pairs of notes starting together that clash "
-                      "(semitone, whole tone, tritone or seventh apart)",
+    "dissonance": "share of pairs of notes starting together that are dissonant, i.e. sound "
+                  "tense (a semitone, whole tone, tritone or seventh apart)",
 } | {f"pc_{name}": f"share of notes that are a {name}" for name in PITCH_CLASSES}
 
 
@@ -96,7 +96,7 @@ def bar_features(notes: pd.DataFrame, bar_len: pd.Series | Sequence[int]) -> pd.
     features["pitch_class_entropy"] = entropy.clip(lower=0)  # no "-0.0" for one-note bars
     features["top_line_leap"] = (
         chords.max().groupby(level="bar").diff().abs().groupby(level="bar").mean())
-    features["clash_fraction"] = _clash_fraction(notes)
+    features["dissonance"] = _dissonance(notes)
     for pc, name in enumerate(PITCH_CLASSES):
         features[f"pc_{name}"] = shares[pc]
     return features[list(FEATURES)]
@@ -118,9 +118,9 @@ def _ranges(lengths: np.ndarray) -> np.ndarray:
     return np.arange(lengths.sum()) - starts
 
 
-def _clash_fraction(notes: pd.DataFrame) -> pd.Series:
+def _dissonance(notes: pd.DataFrame) -> pd.Series:
     pairs = notes[["bar", "onset", "pitch"]].merge(notes[["bar", "onset", "pitch"]],
                                                    on=["bar", "onset"], suffixes=("", "_other"))
     pairs = pairs[pairs.pitch < pairs.pitch_other]
-    clashes = ((pairs.pitch_other - pairs.pitch) % 12).isin(CLASHING_INTERVALS)
-    return clashes.groupby(pairs.bar).mean()
+    dissonant = ((pairs.pitch_other - pairs.pitch) % 12).isin(DISSONANT_INTERVALS)
+    return dissonant.groupby(pairs.bar).mean()
