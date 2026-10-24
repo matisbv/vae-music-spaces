@@ -1,6 +1,11 @@
 # Tools for analysing a trained model
 [<< go back to the main README](../README.md)
 
+The analysis itself is in the notebooks:
+
+- [What does the model remember about a bar?](../notebooks/03_what_the_code_remembers.ipynb)
+  (figures and sounds in [`notebooks/outputs/q1`](../notebooks/outputs/q1))
+
 Once a model is trained, these tools let you look inside it: encode every bar of the corpus
 into the latent space, describe bars with simple measurements, decode latent codes back into
 music, and listen to the results.

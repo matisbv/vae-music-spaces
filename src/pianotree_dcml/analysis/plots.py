@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import Sequence
 
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from matplotlib.patches import Rectangle
 
 from pianotree_dcml.representation import Note, pitch_name
@@ -62,6 +64,33 @@ def plot_bars(
                        titles[i] if titles else None, pitch_range, color)
     fig.tight_layout()
     return fig
+
+
+def plot_probe_results(
+    results: pd.DataFrame, colors: dict[str, str] | None = None, ax: plt.Axes | None = None
+) -> plt.Axes:
+    """Horizontal bars of probe scores (``run_probes`` output): one group per property,
+    one bar per set of codes, with 95% intervals and a mark at chance level."""
+    properties = list(dict.fromkeys(results.property))
+    names = list(dict.fromkeys(results.codes))
+    ax = ax or plt.subplots(figsize=(7, 0.5 + 0.28 * len(properties) * len(names)))[1]
+    height = 0.8 / len(names)
+    for j, name in enumerate(names):
+        rows = results[results.codes == name].set_index("property").loc[properties]
+        y = np.arange(len(properties)) + j * height
+        errors = np.abs(rows[["low", "high"]].to_numpy().T - rows.score.to_numpy())
+        ax.barh(y, rows.score, height, xerr=errors, label=name, capsize=2,
+                color=(colors or {}).get(name))
+    chance = results.groupby("property", sort=False).chance.first().loc[properties]
+    for i, level in enumerate(chance):
+        if level > 0:
+            ax.plot([level, level], [i - height / 2, i + 0.8 - height / 2], "k:", linewidth=1)
+    ax.set_yticks(np.arange(len(properties)) + 0.4 - height / 2, properties)
+    ax.invert_yaxis()
+    ax.set_xlim(min(0, results.score.min()), 1)
+    ax.set_xlabel("score on new pieces (1 = perfect, dotted = guessing)")
+    ax.legend(loc="lower right", fontsize=8)
+    return ax
 
 
 def _pitch_range(bars: Sequence[Sequence[Note]], margin: int = 3) -> tuple[int, int]:
