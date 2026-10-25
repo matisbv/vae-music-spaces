@@ -8,7 +8,8 @@ import torch
 pytest.importorskip("pretty_midi", reason="needs the analysis extra")
 pytest.importorskip("matplotlib", reason="needs the analysis extra")
 
-from pianotree_dcml.analysis.audio import SAMPLE_RATE, save_wav, synthesize, to_midi  # noqa: E402
+from pianotree_dcml.analysis.audio import (  # noqa: E402
+    SAMPLE_RATE, save_mp3, save_wav, synthesize, synthesize_midi, to_midi)
 from pianotree_dcml.analysis.decode import decode, lerp, slerp  # noqa: E402
 from pianotree_dcml.analysis.encode import (  # noqa: E402
     dataset_for, default_output_path, encode_bars, load_embeddings, save_embeddings)
@@ -144,7 +145,8 @@ def test_midi():
 def test_synthesize_and_save_wav(tmp_path):
     audio = synthesize([[Note(0, 60, 4)], [Note(0, 72, 8)]], bar_lens=[8, 8], tempo=120)
     step = 60 / 120 / 4
-    assert len(audio) == pytest.approx((16 * step + 0.08) * SAMPLE_RATE, abs=2)
+    # the music, the last note's release (0.15 s) and half a second of reverb tail
+    assert len(audio) == pytest.approx((16 * step + 0.15 + 0.5) * SAMPLE_RATE, abs=3)
     assert np.isfinite(audio).all()
     assert np.abs(audio).max() == pytest.approx(0.9, abs=1e-6)
     assert np.abs(audio[: int(4 * step * SAMPLE_RATE)]).max() > 0.1  # the first note sounds
@@ -153,6 +155,24 @@ def test_synthesize_and_save_wav(tmp_path):
     save_wav(audio, tmp_path / "a.wav")
     with wave.open(str(tmp_path / "a.wav")) as f:
         assert (f.getframerate(), f.getnchannels(), f.getnframes()) == (SAMPLE_RATE, 1, len(audio))
+
+
+def test_save_mp3(tmp_path):
+    audio = synthesize([[Note(0, 60, 4), Note(4, 64, 4)]], bar_lens=[8])
+    save_mp3(audio, tmp_path / "a.mp3")
+    data = (tmp_path / "a.mp3").read_bytes()
+    assert data[:2] == bytes([0xFF, 0xFB])  # the start of an MPEG audio frame
+    assert 0 < len(data) < len(audio) * 2 / 2  # less than half the size of a 16-bit WAV
+
+
+def test_synthesize_midi_matches_synthesize(tmp_path):
+    bars = [[Note(0, 60, 4), Note(2, 67, 2)], [Note(0, 48, 8)]]
+    to_midi(bars, tmp_path / "a.mid", bar_lens=[8, 8], gap_steps=2)
+    direct = synthesize(bars, bar_lens=[8, 8], gap_steps=2)
+    from_file = synthesize_midi(tmp_path / "a.mid")
+    assert len(from_file) == pytest.approx(len(direct), abs=SAMPLE_RATE * 0.01)
+    n = min(len(direct), len(from_file))
+    assert np.corrcoef(direct[:n], from_file[:n])[0, 1] > 0.99
 
 
 def test_plot_bars():

@@ -50,13 +50,13 @@ model, trained on all corpora, needs a GPU: free ones are available on Kaggle an
 Four notebooks look inside the trained models, comparing them with an untrained copy and with
 simple measurements of the music. Each one comes with figures and sounds.
 
-1. [What does the model remember about a bar?](notebooks/03_what_the_code_remembers.ipynb)
+1. [What does the model remember about a bar?](notebooks/01_what_the_code_remembers.ipynb)
    Mostly a faithful picture of the notes, not their musical context.
-2. [Moving through the code](notebooks/04_moving_through_the_code.ipynb): some musical
+2. [Moving through the code](notebooks/02_moving_through_the_code.ipynb): some musical
    qualities, like "higher" and "busier", are directions you can move along; others are not.
-3. [Do related keys sit close together?](notebooks/05_related_keys.ipynb) One of the models
+3. [Do related keys sit close together?](notebooks/03_related_keys.ipynb) One of the models
    rediscovered the circle of fifths on its own.
-4. [Composers and the history of music](notebooks/06_composers_and_history.ipynb): the code
+4. [Composers and the history of music](notebooks/04_composers_and_history.ipynb): the code
    recognises composers and dates pieces, better than simple statistics but far from perfectly.
 
 The code is documented throughout. A good place to start reading is

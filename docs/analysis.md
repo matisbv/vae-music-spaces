@@ -3,13 +3,13 @@
 
 The analysis itself is in the notebooks:
 
-- [What does the model remember about a bar?](../notebooks/03_what_the_code_remembers.ipynb)
+- [What does the model remember about a bar?](../notebooks/01_what_the_code_remembers.ipynb)
   (figures and sounds in [`notebooks/outputs/q1`](../notebooks/outputs/q1))
-- [Moving through the code](../notebooks/04_moving_through_the_code.ipynb)
+- [Moving through the code](../notebooks/02_moving_through_the_code.ipynb)
   (figures and sounds in [`notebooks/outputs/q2`](../notebooks/outputs/q2))
-- [Do related keys sit close together?](../notebooks/05_related_keys.ipynb)
+- [Do related keys sit close together?](../notebooks/03_related_keys.ipynb)
   (figures and sounds in [`notebooks/outputs/q3`](../notebooks/outputs/q3))
-- [Composers and the history of music in the latent space](../notebooks/06_composers_and_history.ipynb)
+- [Composers and the history of music in the latent space](../notebooks/04_composers_and_history.ipynb)
   (figures and sounds in [`notebooks/outputs/q4`](../notebooks/outputs/q4))
 
 Once a model is trained, these tools let you look inside it: encode every bar of the corpus
@@ -77,7 +77,7 @@ model hasn't learned anything beyond them.
 ```python
 from pianotree_dcml.train import load_checkpoint
 from pianotree_dcml.analysis.decode import decode, slerp
-from pianotree_dcml.analysis.audio import play, save_wav, synthesize, to_midi
+from pianotree_dcml.analysis.audio import play, save_mp3, synthesize, to_midi
 from pianotree_dcml.analysis.plots import plot_bars
 
 model, config = load_checkpoint("runs/full/best.pt")
@@ -88,10 +88,11 @@ path = decode(model, slerp(embeddings.mean[0], embeddings.mean[100], 8))
 plot_bars(path, ncols=8)
 
 play(path, gap_steps=2)                                  # an audio player, in a notebook
-save_wav(synthesize(path, gap_steps=2), "interpolation.wav")
+save_mp3(synthesize(path, gap_steps=2), "interpolation.mp3")
 to_midi(path, "interpolation.mid", gap_steps=2)          # for a real piano sound
 ```
 
-Audio comes from a small piano-like synthesizer built into the package, so it works
-anywhere, including on Colab, without installing anything. The MIDI files can be opened in
-any music software for a better piano sound.
+Audio comes from a small piano synthesizer built into the package, so it works anywhere,
+including on Colab, without installing anything. `synthesize_midi` plays an existing MIDI file
+with the same piano. For a recorded piano sound, open the MIDI files in any music software
+and render them with a piano SoundFont.
